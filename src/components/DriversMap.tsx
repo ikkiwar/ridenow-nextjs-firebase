@@ -49,7 +49,7 @@ export default function DriversMap() {
           setStatusMsg(`Ubicación obtenida: ${coords[0]}, ${coords[1]}`);
 
           // Generar driverId robusto
-          let newDriverId = null;
+          let newDriverId: string | null = null;
           try {
             newDriverId = window.localStorage.getItem("driverId");
             if (!newDriverId) {
