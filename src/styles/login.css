@@ -1,0 +1,107 @@
+/* Estilos para los placeholders del formulario de login */
+::placeholder {
+    color: #555 !important;
+    font-weight: 500;
+    opacity: 1 !important;
+    /* Firefox */
+}
+
+/* Animación para el logo */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo-animation {
+    animation: fadeInUp 0.5s ease-out;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Establece el ancho máximo del logo */
+.logo-animation img {
+    max-width: 400px !important;
+}
+
+/* Media queries para responsive design */
+@media (max-width: 640px) {
+    .logo-animation img {
+        width: 90% !important;
+        max-width: 300px !important;
+    }
+}
+
+::-webkit-input-placeholder {
+    /* Chrome/Opera/Safari */
+    color: #555 !important;
+    font-weight: 500;
+}
+
+::-moz-placeholder {
+    /* Firefox 19+ */
+    color: #555 !important;
+    font-weight: 500;
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    /* IE 10+ */
+    color: #555 !important;
+    font-weight: 500;
+}
+
+:-moz-placeholder {
+    /* Firefox 18- */
+    color: #555 !important;
+    font-weight: 500;
+    opacity: 1;
+}
+
+/* Estilos responsivos adicionales */
+@media (max-width: 480px) {
+
+    /* Ajustes para pantallas muy pequeñas */
+    input,
+    button {
+        font-size: 16px !important;
+        /* Previene el zoom en iOS al enfocar campos */
+    }
+
+    .bg-white {
+        padding: 1.25rem !important;
+    }
+}
+
+/* Mejoras de accesibilidad para tap targets en móviles */
+@media (max-width: 768px) {
+
+    button,
+    [type="button"],
+    [type="submit"] {
+        min-height: 44px;
+        /* Mínimo recomendado para elementos táctiles */
+    }
+
+    input {
+        min-height: 42px;
+    }
+}
+
+/* Mejora de animaciones en dispositivos con preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .logo-animation {
+        animation: none;
+    }
+
+    * {
+        transition-duration: 0.001ms !important;
+    }
+}
