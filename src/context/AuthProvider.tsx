@@ -21,12 +21,18 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    // Solo ejecutar en el lado del cliente
+    if (typeof window !== 'undefined') {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } else {
+      // En el servidor, simplemente establecer loading=false
+      setLoading(false);
+    }
   }, []);
 
   return (
