@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "vercel-build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "critters": "^0.0.25",
     "firebase": "^11.9.1",
     "framer-motion": "^12.18.1",
     "leaflet": "^1.9.4",

@@ -1,6 +1,10 @@
-"use client";
- 
 import Link from "next/link";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'No encontrado - RideNow',
+  description: 'La página que estás buscando no existe',
+};
  
 export default function NotFound() {
   return (
