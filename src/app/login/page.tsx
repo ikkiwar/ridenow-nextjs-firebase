@@ -7,6 +7,8 @@ import { useAuth } from "../../context/AuthProvider";
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import '../../styles/login.css';
+import AuthDebugger from "../../components/AuthDebugger";
+import VercelEnvChecker from "../../components/VercelEnvChecker";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,12 +64,37 @@ export default function LoginPage() {
     setError("");
     setIsSubmitting(true);
     try {
+      console.log("Iniciando autenticación con Google...");
+      console.log("Auth Domain:", process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN);
+      console.log("Dominio actual:", window.location.hostname);
+      
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       // La redirección se hará automáticamente gracias al useEffect
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || "Error al iniciar sesión con Google");
+    } catch (err: unknown) {
+      console.error("Error de autenticación con Google:", err);
+      
+      // Extraer información detallada del error
+      let errorMessage = "Error al iniciar sesión con Google";
+      
+      // Firebase Auth Error
+      const firebaseError = err as { code?: string; message?: string };
+      
+      if (firebaseError.code === "auth/unauthorized-domain") {
+        errorMessage = `El dominio actual (${window.location.hostname}) no está autorizado en la consola de Firebase. 
+        Auth Domain: ${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "No configurado"}. 
+        Ve a Firebase Console > Authentication > Settings y añade este dominio a la lista de dominios autorizados.`;
+      } else if (firebaseError.code === "auth/popup-closed-by-user") {
+        errorMessage = "Ventana de inicio de sesión cerrada antes de completar la autenticación.";
+      } else if (firebaseError.code === "auth/cancelled-popup-request") {
+        errorMessage = "La solicitud fue cancelada porque hay múltiples intentos de inicio de sesión.";
+      } else if (firebaseError.code === "auth/popup-blocked") {
+        errorMessage = "El navegador bloqueó la ventana emergente. Asegúrate de permitir ventanas emergentes para este sitio.";
+      } else if (firebaseError.code) {
+        errorMessage = `Error de autenticación: ${firebaseError.code} - ${firebaseError.message || "No hay detalles disponibles"}`;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -99,6 +126,12 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6" style={{ backgroundColor: '#FFD60A' }}>
+      {/* Añadir el depurador de autenticación */}
+      <AuthDebugger />
+      
+      {/* Añadir el verificador de variables de entorno en Vercel */}
+      <VercelEnvChecker />
+      
       <div className="flex justify-center mb-8 sm:mb-10">
         <div className="logo-animation">
           <Image 
