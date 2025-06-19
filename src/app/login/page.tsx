@@ -4,13 +4,14 @@ import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 import { useAuth } from "../../context/AuthProvider";
+import { assignUserRole } from "../../utils/roleUtils";
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import '../../styles/login.css';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, getDashboardPath } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,12 +19,12 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Si el usuario ya está autenticado, redirigir a la página principal
+  // Si el usuario ya está autenticado, redirigir al panel correspondiente a su rol
   useEffect(() => {
     if (user && !authLoading) {
-      router.push("/");
+      router.push(getDashboardPath());
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, getDashboardPath]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +42,20 @@ export default function LoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
         // La redirección se hará automáticamente gracias al useEffect
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Crear el usuario en Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Asignar el rol "driver" al nuevo usuario en Firestore
+        const user = userCredential.user;
+        await assignUserRole(user.uid, "driver", {
+          email: user.email,
+          displayName: user.displayName || null,
+          photoURL: user.photoURL || null,
+          phoneNumber: user.phoneNumber || null,
+          lastLogin: new Date().toISOString(),
+          forceRoleUpdate: true // Para nuevos usuarios, asegurar que el rol es "driver"
+        });
+        
         // Después de registrarse, limpiar campos y cambiar a modo login
         setEmail("");
         setPassword("");
@@ -63,7 +77,25 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Comprobar si el usuario existe en Firestore y actualizar solo los datos de perfil
+      try {
+        // Solo actualizamos datos del perfil, sin tocar el rol actual
+        await assignUserRole(user.uid, "driver", {
+          email: user.email,
+          displayName: user.displayName || null,
+          photoURL: user.photoURL || null,
+          phoneNumber: user.phoneNumber || null,
+          lastLogin: new Date().toISOString(),
+          // No incluimos forceRoleUpdate para preservar el rol existente
+        });
+      } catch (roleErr) {
+        console.error("Error al asignar rol al usuario de Google:", roleErr);
+        // Continuamos con la sesión aunque falle la asignación de rol
+      }
+      
       // La redirección se hará automáticamente gracias al useEffect
     } catch (err: unknown) {
       console.error("Error de autenticación con Google:", err);
@@ -139,7 +171,7 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="border rounded-md px-3 py-2.5 w-full text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent placeholder-gray-600 placeholder:font-medium"
+            className="border rounded-md px-3 py-2.5 w-full text-base text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent placeholder-gray-600 placeholder:font-medium"
             required
             disabled={isSubmitting}
           />
@@ -148,7 +180,7 @@ export default function LoginPage() {
             placeholder="Contraseña"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="border rounded-md px-3 py-2.5 w-full text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent placeholder-gray-600 placeholder:font-medium"
+            className="border rounded-md px-3 py-2.5 w-full text-base text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent placeholder-gray-600 placeholder:font-medium"
             required
             disabled={isSubmitting}
           />
@@ -159,7 +191,7 @@ export default function LoginPage() {
               placeholder="Confirmar Contraseña"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
-              className="border rounded-md px-3 py-2.5 w-full text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent placeholder-gray-600 placeholder:font-medium"
+              className="border rounded-md px-3 py-2.5 w-full text-base text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent placeholder-gray-600 placeholder:font-medium"
               required
               disabled={isSubmitting}
             />
