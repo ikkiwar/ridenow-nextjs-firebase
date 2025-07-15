@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Funciones auxiliares para verificar roles y pertenencia a compañías
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function userRole() {
+      return getUserData().role;
+    }
+    
+    function isAdmin() {
+      return userRole() == 'admin' || userRole() == 'superadmin';
+    }
+    
+    function isSuperAdmin() {
+      return userRole() == 'superadmin';
+    }
+    
+    function isDriver() {
+      return userRole() == 'driver';
+    }
+    
+    function belongsToCompany(companyId) {
+      let userData = getUserData();
+      return isSuperAdmin() ? 
+        (userData.companiesAccess != null && companyId in userData.companiesAccess) : 
+        (userData.companyId == companyId);
+    }
+    
+    function isCurrentUser(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Reglas para usuarios
+    match /users/{userId} {
+      // Todos los usuarios autenticados pueden leer perfiles básicos
+      allow read: if isSignedIn();
+      
+      // El propio usuario o un admin puede leer datos completos o escribir
+      allow write: if isCurrentUser(userId) || isAdmin();
+      
+      // Los superadmins pueden hacer cualquier operación con usuarios
+      allow write: if isSuperAdmin();
+    }
+    
+    // Reglas para la colección de compañías
+    match /companies/{companyId} {
+      // Permitir a superadmins listar y leer todas las compañías
+      allow read: if isSignedIn() && (isSuperAdmin() || belongsToCompany(companyId));
+      
+      // Solo los administradores de la compañía pueden modificar datos básicos
+      allow write: if isSignedIn() && ((belongsToCompany(companyId) && isAdmin()) || isSuperAdmin());
+      
+      // Reglas para conductores dentro de una compañía
+      match /drivers/{driverId} {
+        // Los miembros de la compañía pueden ver conductores
+        allow read: if isSignedIn() && belongsToCompany(companyId);
+        
+        // Solo admin de la compañía o el propio conductor pueden modificar
+        allow write: if isSignedIn() && belongsToCompany(companyId) && 
+                        (isAdmin() || (isDriver() && request.resource.data.userId == request.auth.uid));
+      }
+      
+      // Reglas para viajes dentro de una compañía
+      match /rides/{rideId} {
+        // Los miembros de la compañía pueden ver viajes
+        allow read: if isSignedIn() && belongsToCompany(companyId);
+        
+        // Admin puede modificar cualquier viaje
+        allow write: if isSignedIn() && belongsToCompany(companyId) && isAdmin();
+        
+        // Conductores solo pueden modificar sus propios viajes asignados
+        allow write: if isSignedIn() && belongsToCompany(companyId) && 
+                       isDriver() && resource.data.driverId == request.auth.uid;
+      }
+      
+      // Reglas para regiones dentro de una compañía
+      match /regions/{regionId} {
+        allow read: if isSignedIn() && belongsToCompany(companyId);
+        allow write: if isSignedIn() && belongsToCompany(companyId) && isAdmin();
+      }
+      
+      // Reglas para configuración de la compañía
+      match /settings/{settingId} {
+        allow read: if isSignedIn() && belongsToCompany(companyId);
+        allow write: if isSignedIn() && belongsToCompany(companyId) && isAdmin();
+      }
+    }
+    
+    // Reglas predeterminadas - denegar todo lo demás
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

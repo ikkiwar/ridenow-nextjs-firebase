@@ -75,6 +75,16 @@ export default function DriverMapPage() {
             >
               No disponibles
             </button>
+            <button
+              onClick={() => setActiveFilter("resting")}
+              className={`px-3 py-1 rounded-full text-sm ${
+                activeFilter === "resting"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+              }`}
+            >
+              Descanso
+            </button>
           </div>
           
           <div className="h-[calc(100vh-300px)] min-h-[400px] bg-gray-100 rounded-lg overflow-hidden">
@@ -85,7 +95,9 @@ export default function DriverMapPage() {
             <p>Filtro activo: {activeFilter === "all" ? "Todos" : 
                               activeFilter === "available" ? "Disponibles" : 
                               activeFilter === "busy" ? "En servicio" : 
-                              "No disponibles"}</p>
+                              activeFilter === "offline" ? "No disponibles" : 
+                              activeFilter === "resting" ? "Descanso" : 
+                              "Todos"}</p>
             <p className="mt-1">Los marcadores mostrados son datos de ejemplo. En una versión completa, se aplicarían filtros en tiempo real.</p>
           </div>
         </div>

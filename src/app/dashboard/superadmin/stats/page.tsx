@@ -132,7 +132,7 @@ export default function SuperAdminStats() {
         
         {/* Resumen general del sistema */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
-          <h2 className="text-lg font-medium mb-4">Resumen del Sistema</h2>
+                      <h2 className="text-lg font-bold mb-4 text-gray-800">Resumen del Sistema</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-gray-600">Usuarios Totales</p>
@@ -168,7 +168,7 @@ export default function SuperAdminStats() {
         {/* Estadísticas principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Viajes Totales</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Viajes Totales</h2>
             <p className="text-3xl font-bold text-blue-500">{currentStats[0].totalRides}</p>
             <p className={`text-sm mt-2 ${getChangeClass(currentStats[0].totalRides, currentStats[1]?.totalRides)}`}>
               {calculateChange(currentStats[0].totalRides, currentStats[1]?.totalRides)} vs. {currentStats[1]?.period}
@@ -176,7 +176,7 @@ export default function SuperAdminStats() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Tasa de Completitud</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Tasa de Completitud</h2>
             <p className="text-3xl font-bold text-purple-500">{currentStats[0].completionRate}%</p>
             <p className={`text-sm mt-2 ${getChangeClass(currentStats[0].completionRate, currentStats[1]?.completionRate)}`}>
               {calculateChange(currentStats[0].completionRate, currentStats[1]?.completionRate)} vs. {currentStats[1]?.period}
@@ -184,7 +184,7 @@ export default function SuperAdminStats() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Calificación Media</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Calificación Media</h2>
             <p className="text-3xl font-bold text-amber-500">
               <span className="flex items-center">
                 {currentStats[0].avgRating.toFixed(1)}
@@ -197,7 +197,7 @@ export default function SuperAdminStats() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Ingresos Diarios</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Ingresos Diarios</h2>
             <p className="text-3xl font-bold text-green-500">${(currentStats[0].revenue / (timePeriod === 'day' ? 1 : timePeriod === 'week' ? 7 : 30)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</p>
             <p className="text-sm mt-2 text-gray-600">Promedio por día</p>
           </div>

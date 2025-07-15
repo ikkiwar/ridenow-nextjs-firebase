@@ -1,25 +1,45 @@
 "use client";
 
 import DashboardNavigation from "./DashboardNavigation";
+import CompanySelector from "./CompanySelector";
 import { ReactNode, useState, useEffect } from "react";
+import { useAuth } from "../context/AuthProvider";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { isSuperAdmin, currentCompany } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // Solo usar localStorage en desktop
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      const saved = localStorage.getItem('sidebarOpen');
+      return saved ? JSON.parse(saved) : true;
+    }
+    return false; // En móvil siempre cerrado por defecto
+  });
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar si estamos en móvil
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // 1024px = lg breakpoint en Tailwind
-      // Si cambiamos a móvil, aseguramos que el sidebar esté cerrado
-      if (window.innerWidth < 1024) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true); // Por defecto abierto en desktop
+      const newIsMobile = window.innerWidth < 1024; // 1024px = lg breakpoint en Tailwind
+      
+      // Solo cambiar el estado si realmente cambiamos entre móvil y desktop
+      if (newIsMobile !== isMobile) {
+        setIsMobile(newIsMobile);
+        
+        if (newIsMobile) {
+          // En móvil, cerrar el sidebar y no usar localStorage
+          setSidebarOpen(false);
+        } else {
+          // En desktop, restaurar el estado guardado
+          const saved = localStorage.getItem('sidebarOpen');
+          if (saved !== null) {
+            setSidebarOpen(JSON.parse(saved));
+          }
+        }
       }
     };
     
@@ -29,10 +49,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     // Verificar al redimensionar la ventana
     window.addEventListener('resize', checkIsMobile);
     return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
+  }, [isMobile]);
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    const newState = !sidebarOpen;
+    setSidebarOpen(newState);
+    // Solo guardar en localStorage si no estamos en móvil
+    if (typeof window !== 'undefined' && !isMobile) {
+      localStorage.setItem('sidebarOpen', JSON.stringify(newState));
+    }
   };
 
   return (
@@ -56,7 +81,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
         {/* Header with menu button - solo para móvil */}
-        <div className="bg-white p-4 flex items-center justify-between shadow-sm">
+        <div className="bg-white px-4 py-6 flex items-center justify-between shadow-sm border-b border-gray-200 h-20">
           <div className="flex items-center">
             {/* Botón de hamburguesa solo visible en móvil */}
             <button 
@@ -71,10 +96,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             
             {/* Título de la página actual o breadcrumb puede ir aquí */}
             <h1 className="text-lg font-medium text-gray-800">Dashboard</h1>
+            
+            {/* Mostrar nombre de la compañía actual (para no superadmins) */}
+            {currentCompany && !isSuperAdmin && (
+              <div className="hidden md:block ml-4 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700">
+                {currentCompany.name}
+              </div>
+            )}
           </div>
           
-          {/* Espacio para elementos adicionales al header: notificaciones, perfil, etc. */}
+          {/* Elementos adicionales al header */}
           <div className="flex items-center">
+            {/* Selector de compañía para superadmins */}
+            <CompanySelector className="mr-4" />
+            
             {/* Placeholder para futuras funcionalidades como notificaciones o perfil rápido */}
           </div>
         </div>

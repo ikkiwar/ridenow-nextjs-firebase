@@ -46,7 +46,7 @@ export default function Dashboard() {
         </div>
         
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Información de Cuenta</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Información de Cuenta</h2>
           
           <div className="mb-6">
             <RoleInfo showPermissions={true} className="w-full max-w-sm" />
@@ -69,7 +69,7 @@ export default function Dashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Estado del Sistema</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Estado del Sistema</h2>
             <ul className="space-y-2">
               <li className="flex items-center">
                 <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
@@ -87,7 +87,7 @@ export default function Dashboard() {
           </div>
           
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Versión Actual</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Versión Actual</h2>
             <p className="text-gray-600 mb-2">RideNow v1.0.0</p>
             <p className="text-xs text-gray-500">Última actualización: {new Date().toLocaleDateString()}</p>
           </div>

@@ -114,7 +114,7 @@ export default function AdminStats() {
         {/* Tarjetas de resumen */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Viajes Totales</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Viajes Totales</h2>
             <p className="text-3xl font-bold text-blue-500">{currentStats[0].totalRides}</p>
             <p className={`text-sm mt-2 ${getChangeClass(currentStats[0].totalRides, currentStats[1]?.totalRides)}`}>
               {calculateChange(currentStats[0].totalRides, currentStats[1]?.totalRides)} vs. {currentStats[1]?.period}
@@ -122,7 +122,7 @@ export default function AdminStats() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Conductores Activos</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Conductores Activos</h2>
             <p className="text-3xl font-bold text-green-500">{currentStats[0].activeDrivers}</p>
             <p className={`text-sm mt-2 ${getChangeClass(currentStats[0].activeDrivers, currentStats[1]?.activeDrivers)}`}>
               {calculateChange(currentStats[0].activeDrivers, currentStats[1]?.activeDrivers)} vs. {currentStats[1]?.period}
@@ -130,7 +130,7 @@ export default function AdminStats() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Tasa de Completitud</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Tasa de Completitud</h2>
             <p className="text-3xl font-bold text-purple-500">{currentStats[0].completionRate}%</p>
             <p className={`text-sm mt-2 ${getChangeClass(currentStats[0].completionRate, currentStats[1]?.completionRate)}`}>
               {calculateChange(currentStats[0].completionRate, currentStats[1]?.completionRate)} vs. {currentStats[1]?.period}
@@ -138,7 +138,7 @@ export default function AdminStats() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Ingresos</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Ingresos</h2>
             <p className="text-3xl font-bold text-yellow-500">${currentStats[0].revenue.toLocaleString()}</p>
             <p className={`text-sm mt-2 ${getChangeClass(currentStats[0].revenue, currentStats[1]?.revenue)}`}>
               {calculateChange(currentStats[0].revenue, currentStats[1]?.revenue)} vs. {currentStats[1]?.period}
