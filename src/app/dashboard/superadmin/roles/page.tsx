@@ -203,14 +203,14 @@ export default function RoleManagement() {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4">Información de Permisos</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Información de Permisos</h2>
           <div className="prose">
             <p>Los permisos controlan a qué funcionalidades puede acceder cada rol. A continuación se presenta una lista de permisos disponibles en el sistema:</p>
             
             <h3 className="mt-4 text-lg font-medium">Permisos de Conductores</h3>
             <ul className="list-disc ml-5 space-y-1">
               <li><strong>view_own_rides</strong>: Ver sus propios viajes</li>
-              <li><strong>update_own_status</strong>: Actualizar su estado (disponible, ocupado, offline)</li>
+                              <li><strong>update_own_status</strong>: Actualizar su estado (disponible, ocupado, offline, descanso)</li>
               <li><strong>update_own_location</strong>: Actualizar su ubicación</li>
               <li><strong>accept_rides</strong>: Aceptar solicitudes de viaje</li>
               <li><strong>complete_rides</strong>: Completar viajes</li>

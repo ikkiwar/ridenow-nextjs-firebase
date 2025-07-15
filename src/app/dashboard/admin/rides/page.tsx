@@ -208,7 +208,7 @@ export default function AdminRides() {
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Total de Viajes</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Total de Viajes</h2>
             <p className="text-3xl font-bold text-gray-700">{mockRides.length}</p>
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-blue-500 font-medium">
@@ -221,7 +221,7 @@ export default function AdminRides() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Ingresos Totales</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Ingresos Totales</h2>
             <p className="text-3xl font-bold text-green-500">${totalFare}</p>
             <p className="text-sm text-gray-500 mt-2">
               Promedio: ${completedRides.length > 0 ? (totalFare / completedRides.length).toFixed(0) : 0}/viaje
@@ -229,7 +229,7 @@ export default function AdminRides() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Tasa de Completitud</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Tasa de Completitud</h2>
             <p className="text-3xl font-bold text-purple-500">
               {mockRides.length > 0 ? (completedRides.length / mockRides.length * 100).toFixed(0) : 0}%
             </p>
@@ -239,7 +239,7 @@ export default function AdminRides() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Viajes Activos</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Viajes Activos</h2>
             <p className="text-3xl font-bold text-blue-500">{inProgressRides.length}</p>
             <p className="text-sm text-gray-500 mt-2">
               En tiempo real

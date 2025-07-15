@@ -24,25 +24,25 @@ export default function SuperAdminDashboard() {
             
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Usuarios Totales</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Usuarios Totales</h2>
             <p className="text-3xl font-bold text-purple-500">124</p>
             <p className="text-sm text-gray-500 mt-2">+12 esta semana</p>
           </div>
               
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Administradores</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Administradores</h2>
             <p className="text-3xl font-bold text-blue-500">8</p>
             <p className="text-sm text-gray-500 mt-2">Sin cambios</p>
           </div>
               
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Conductores</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Conductores</h2>
             <p className="text-3xl font-bold text-green-500">112</p>
             <p className="text-sm text-gray-500 mt-2">+10 esta semana</p>
           </div>
               
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Regiones Activas</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Regiones Activas</h2>
             <p className="text-3xl font-bold text-yellow-500">5</p>
             <p className="text-sm text-gray-500 mt-2">+1 nuevo</p>
           </div>
@@ -63,7 +63,7 @@ export default function SuperAdminDashboard() {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <h2 className="text-xl font-semibold mb-4">Monitoreo de Conductores</h2>
+              <h2 className="text-xl font-bold mb-4 text-gray-900">Monitoreo de Conductores</h2>
               <div className="h-80 bg-gray-100 rounded-lg overflow-hidden">
                 <DriversMapClient />
               </div>
@@ -71,8 +71,11 @@ export default function SuperAdminDashboard() {
           </div>
               
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Administración del Sistema</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Administración del Sistema</h2>
             <div className="flex flex-col space-y-3">
+              <Link href="/dashboard/superadmin/companies" className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 text-center">
+                Gestionar Compañías
+              </Link>
               <Link href="/dashboard/superadmin/users" className="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 text-center">
                 Gestionar Usuarios
               </Link>
@@ -112,14 +115,14 @@ export default function SuperAdminDashboard() {
             
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Ingresos Mensuales</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Ingresos Mensuales</h2>
             <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
               <p className="text-gray-500">Gráfico de Ingresos</p>
             </div>
           </div>
                 
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Viajes Completados</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Viajes Completados</h2>
             <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
               <p className="text-gray-500">Gráfico de Viajes</p>
             </div>

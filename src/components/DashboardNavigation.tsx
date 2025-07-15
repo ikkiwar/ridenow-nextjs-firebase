@@ -127,6 +127,15 @@ export default function DashboardNavigation({
     if (isSuperAdmin) {
       return [...commonLinks,
         {
+          href: "/dashboard/superadmin/companies",
+          label: "Compañías",
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          )
+        },
+        {
           href: "/dashboard/superadmin/users",
           label: "Usuarios",
           icon: (
@@ -193,7 +202,7 @@ export default function DashboardNavigation({
 
   return (
     <div className={`bg-white border-r border-gray-200 h-full fixed top-0 left-0 ${sidebarWidthClass} z-30 shadow-md transform transition-all duration-300 ease-in-out ${sidebarVisibilityClass}`}>
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="px-4 py-6 border-b border-gray-200 flex items-center justify-between h-20">
         <div className="flex items-center overflow-hidden w-full" 
              onClick={isCollapsible ? onToggle : undefined} // Solo en desktop funciona como toggle
              style={isCollapsible ? { cursor: 'pointer' } : {}}
@@ -202,8 +211,8 @@ export default function DashboardNavigation({
             <Image 
               src="/ridenow_short_logo.png" 
               alt="RideNow Logo" 
-              width={40} 
-              height={40} 
+              width={isCollapsible && !isOpen ? 45 : 40} 
+              height={isCollapsible && !isOpen ? 45 : 40} 
               className={`${isCollapsible && !isOpen ? 'mx-auto' : 'mr-2'}`}
             />
             {(!isCollapsible || isOpen) && (

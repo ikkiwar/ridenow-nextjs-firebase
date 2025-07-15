@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { collection, onSnapshot, QuerySnapshot, DocumentData, setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, QuerySnapshot, DocumentData, setDoc, doc, serverTimestamp, Timestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { useAuth } from "../context/AuthProvider";
 import L from "leaflet";
 
 // Icono personalizado para los conductores (taxi visto desde arriba)
@@ -15,11 +16,15 @@ const driverIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
+// Define our own interface instead of extending DriverData
 interface Driver {
   id: string;
   fullName: string;
-  location: { lat: number; lng: number };
-  lastUpdated?: { toDate: () => Date } | null;
+  location?: { 
+    lat: number; 
+    lng: number; 
+    lastUpdated?: Timestamp; 
+  };
   assignedRideId?: string;
   phone?: string;
   status?: string;
@@ -27,11 +32,12 @@ interface Driver {
     color?: string;
     make?: string;
     model?: string;
-    palte?: string;
+    plate?: string;
   };
 }
 
 export default function DriversMap() {
+  const { companyId, currentCompany } = useAuth();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const [userName, setUserName] = useState<string>("");
@@ -48,6 +54,12 @@ export default function DriversMap() {
           setUserPosition(coords);
           setStatusMsg(`Ubicación obtenida: ${coords[0]}, ${coords[1]}`);
 
+          // Solo permitimos actualizar la ubicación si hay una compañía seleccionada
+          if (!companyId) {
+            setStatusMsg("No hay compañía seleccionada. No se actualizará la ubicación");
+            return;
+          }
+          
           // Generar driverId robusto
           let newDriverId: string | null = null;
           try {
@@ -65,15 +77,22 @@ export default function DriversMap() {
             setStatusMsg("Error generando driverId: " + (e as Error).message);
           }
 
-          // Subir la posición a Firestore como un nuevo conductor
+          // Subir la posición a Firestore como un nuevo conductor en la compañía actual
           try {
-            await setDoc(doc(db, "drivers", newDriverId!), {
+            const driverRef = doc(db, `companies/${companyId}/drivers`, newDriverId!);
+            await setDoc(driverRef, {
               fullName: userName || "Usuario Web",
-              location: { lat: coords[0], lng: coords[1] },
-              lastUpdated: serverTimestamp(),
-              status: "available"
+              location: { 
+                lat: coords[0], 
+                lng: coords[1],
+                lastUpdated: serverTimestamp()
+              },
+              status: "available",
+              updatedAt: serverTimestamp(),
+              // Solo añadimos createdAt si es una creación nueva
+              ...(!newDriverId && { createdAt: serverTimestamp() })
             }, { merge: true });
-            setStatusMsg((msg) => msg + " | Subido a Firestore");
+            setStatusMsg((msg) => msg + ` | Ubicación subida a la compañía: ${currentCompany?.name || companyId}`);
           } catch (e) {
             setStatusMsg("Error subiendo a Firestore: " + (e as Error).message);
           }
@@ -88,18 +107,25 @@ export default function DriversMap() {
         navigator.geolocation.clearWatch(watchId);
       }
     };
-  }, [userName]);
+  }, [userName, companyId, currentCompany]);
 
   useEffect(() => {
+    if (!companyId) {
+      setStatusMsg("No hay compañía seleccionada. No se pueden mostrar conductores.");
+      return () => {};
+    }
+    
+    // Suscripción a los conductores de la compañía actual
     const unsub = onSnapshot(
-      collection(db, "drivers"),
+      collection(db, `companies/${companyId}/drivers`),
       (snapshot: QuerySnapshot<DocumentData>) => {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setDrivers(data as Driver[]);
       }
     );
+
     return () => unsub();
-  }, []);
+  }, [companyId]); // Añadimos companyId como dependencia
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -107,6 +133,14 @@ export default function DriversMap() {
       setUserName(savedName);
     }
   }, []);
+
+  if (!companyId) {
+    return (
+      <div className="bg-yellow-100 text-yellow-800 p-3 rounded">
+        No hay compañía seleccionada. Por favor, seleccione una compañía para ver los conductores.
+      </div>
+    );
+  }
 
   return (
     <>
@@ -135,7 +169,6 @@ export default function DriversMap() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {/* Marcador de la posición del usuario */}
         {userPosition && (
           <Marker position={userPosition} icon={driverIcon}>
             <Popup>Tu ubicación actual</Popup>
@@ -144,16 +177,22 @@ export default function DriversMap() {
         {drivers
           .filter(driver => driver.location && typeof driver.location.lat === "number" && typeof driver.location.lng === "number")
           .map((driver) => (
-            <Marker key={driver.id} position={[driver.location.lat, driver.location.lng]} icon={driverIcon}>
+            <Marker 
+              key={driver.id} 
+              position={[driver.location!.lat, driver.location!.lng]} 
+              icon={driverIcon}
+            >
               <Popup>
                 <strong>{driver.fullName}</strong>
                 <br />
                 Estado: {driver.status || "-"}<br />
                 Tel: {driver.phone || "-"}<br />
                 Vehículo: {driver.vehicle?.make || "-"} {driver.vehicle?.model || ""}<br />
-                Placa: {driver.vehicle?.palte || "-"}<br />
+                Placa: {driver.vehicle?.plate || "-"}<br />
                 Última actualización:<br />
-                {driver.lastUpdated?.toDate ? driver.lastUpdated.toDate().toLocaleString() : "-"}
+                {driver.location?.lastUpdated?.toDate?.() 
+                  ? driver.location.lastUpdated.toDate().toLocaleString() 
+                  : "-"}
               </Popup>
             </Marker>
           ))}

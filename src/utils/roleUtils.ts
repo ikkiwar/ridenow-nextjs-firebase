@@ -18,25 +18,44 @@ export interface UserData {
   photoURL?: string | null;
   phoneNumber?: string | null;
   status?: UserStatus;
+  companyId?: string | null;  // ID de la compañía principal a la que pertenece
+  companiesAccess?: string[]; // Array de IDs de compañías a las que tiene acceso (para superadmin)
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   lastLogin?: Timestamp;
   forceRoleUpdate?: boolean; // Flag para forzar la actualización del rol
+  metadata?: {
+    driverId?: string;      // ID del conductor (para rol driver)
+    licenseVerified?: boolean;
+    documentsVerified?: boolean;
+    managedRegions?: string[]; // Regiones que administra (para rol admin)
+  };
   [key: string]: unknown;
 }
 
 /**
- * Asigna un rol a un usuario en Firestore
+ * Asigna un rol a un usuario en Firestore y opcionalmente lo asocia a una compañía
  * 
  * @param userId - El ID del usuario
  * @param role - El rol a asignar ('driver', 'admin', 'superadmin')
- * @param metadata - Metadatos adicionales según el rol
+ * @param options - Opciones adicionales para asignación de rol
  * @returns Promise<void>
  */
 export async function assignUserRole(
   userId: string, 
   role: UserRole,
-  metadata: Partial<Omit<UserData, 'uid' | 'role'>> = {}
+  options: {
+    companyId?: string;           // La compañía a la que se asigna el usuario
+    forceRoleUpdate?: boolean;    // Forzar la actualización del rol aunque ya exista
+    companiesAccess?: string[];   // Array de IDs de compañías a las que tendrá acceso (para superadmin)
+    metadata?: {                  // Metadatos específicos del rol
+      driverId?: string;          // ID de conductor 
+      licenseVerified?: boolean;
+      documentsVerified?: boolean;
+      managedRegions?: string[];  // Regiones que gestiona (para admin)
+    };
+    [key: string]: unknown;       // Otros campos adicionales
+  } = {}
 ): Promise<void> {
   if (!role) {
     throw new Error("El rol no puede estar vacío");
@@ -49,51 +68,97 @@ export async function assignUserRole(
     const userDoc = await getDoc(userRef);
     
     if (userDoc.exists()) {
-      // Obtenemos los datos actuales del usuario
+      // Obtener los datos actuales del usuario
       const userData = userDoc.data();
       const currentRole = userData.role;
       
-      // Verificamos si el rol debe cambiarse (solo si se especificó forceRoleUpdate=true)
-      let shouldUpdateRole = false;
-      if ('forceRoleUpdate' in metadata && metadata.forceRoleUpdate === true && role !== currentRole) {
-        shouldUpdateRole = true;
-      }
+      // Verificar si el rol debe cambiarse
+      const shouldUpdateRole = options.forceRoleUpdate === true && role !== currentRole;
       
-      // Preparamos los campos básicos a actualizar como un objeto simple
-      // y dejaremos que TypeScript infiera el tipo correcto basado en el uso
-      const updateFields = {
+      // Preparamos los campos a actualizar
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updateData: {[key: string]: any} = {
         lastLogin: serverTimestamp(),
         updatedAt: serverTimestamp()
-      } as const;
-      
-      // Creamos un nuevo objeto para las actualizaciones combinando los campos básicos
-      // con los metadatos filtrados, excluyendo 'forceRoleUpdate'
-      const filteredMetadata = Object.fromEntries(
-        Object.entries(metadata).filter(
-          ([key, value]) => key !== 'forceRoleUpdate' && value !== undefined
-        )
-      );
-      
-      // Combinamos los campos básicos con los metadatos filtrados
-      const fieldsToUpdate = {
-        ...updateFields,
-        ...filteredMetadata,
-        // Si debemos actualizar el rol, lo añadimos
-        ...(shouldUpdateRole ? { role } : {})
       };
       
-      // Realizamos la actualización con los campos combinados
-      await updateDoc(userRef, fieldsToUpdate);
+      // Si debemos actualizar el rol, lo añadimos
+      if (shouldUpdateRole) {
+        updateData.role = role;
+      }
+      
+      // Si se especificó una companyId, la añadimos
+      if (options.companyId) {
+        updateData.companyId = options.companyId;
+      }
+      
+      // Si es superadmin y se especificaron compañías de acceso, las añadimos
+      if (role === 'superadmin' && options.companiesAccess) {
+        updateData.companiesAccess = options.companiesAccess;
+      }
+      
+      // Si hay metadatos, los procesamos
+      if (options.metadata) {
+        updateData.metadata = {
+          ...(userData.metadata || {}),
+          ...options.metadata
+        };
+      }
+      
+      // Añadir otros campos que puedan existir en options
+      Object.entries(options).forEach(([key, value]) => {
+        if (![
+          'forceRoleUpdate', 
+          'companyId', 
+          'companiesAccess', 
+          'metadata'
+        ].includes(key)) {
+          updateData[key] = value;
+        }
+      });
+      
+      // Realizamos la actualización
+      await updateDoc(userRef, updateData);
     } else {
-      // Crear nuevo documento para el usuario
-      await setDoc(userRef, {
+      // Construir objeto para el documento nuevo
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newUserData: {[key: string]: any} = {
         uid: userId,
         role,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        status: "active",
-        ...metadata,
+        status: "active"
+      };
+      
+      // Añadir companyId si se especificó
+      if (options.companyId) {
+        newUserData.companyId = options.companyId;
+      }
+      
+      // Si es superadmin y se especificaron compañías, las añadimos
+      if (role === 'superadmin' && options.companiesAccess && options.companiesAccess.length > 0) {
+        newUserData.companiesAccess = options.companiesAccess;
+      }
+      
+      // Si hay metadatos, los añadimos
+      if (options.metadata) {
+        newUserData.metadata = options.metadata;
+      }
+      
+      // Añadir otros campos que puedan existir en options
+      Object.entries(options).forEach(([key, value]) => {
+        if (![
+          'forceRoleUpdate', 
+          'companyId', 
+          'companiesAccess', 
+          'metadata'
+        ].includes(key)) {
+          newUserData[key] = value;
+        }
       });
+      
+      // Crear el nuevo documento
+      await setDoc(userRef, newUserData);
     }
   } catch (error) {
     console.error("Error al asignar rol:", error);

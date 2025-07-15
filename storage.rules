@@ -1,0 +1,64 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Funciones auxiliares
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function userRole() {
+      return getUserData().role;
+    }
+    
+    function isAdmin() {
+      return userRole() == 'admin' || userRole() == 'superadmin';
+    }
+    
+    function isSuperAdmin() {
+      return userRole() == 'superadmin';
+    }
+    
+    function belongsToCompany(companyId) {
+      let userData = getUserData();
+      return isSuperAdmin() ? 
+        (userData.companiesAccess != null && companyId in userData.companiesAccess) : 
+        (userData.companyId == companyId);
+    }
+
+    // Archivos públicos - cualquiera puede leerlos
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isAdmin();
+    }
+    
+    // Archivos de compañía - solo miembros de la compañía pueden acceder
+    match /companies/{companyId}/{allPaths=**} {
+      allow read: if isSignedIn() && belongsToCompany(companyId);
+      allow write: if isSignedIn() && belongsToCompany(companyId) && isAdmin();
+    }
+    
+    // Archivos de usuario - cada usuario puede modificar sus propios archivos
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Documentos de conductores - solo admins o el propio conductor pueden modificarlos
+    match /drivers/{driverId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (
+        isAdmin() || 
+        firestore.get(/databases/(default)/documents/drivers/$(driverId)).data.userId == request.auth.uid
+      );
+    }
+    
+    // Regla por defecto - denegar todo lo demás
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

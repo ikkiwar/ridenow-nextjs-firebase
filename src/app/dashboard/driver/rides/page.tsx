@@ -168,7 +168,7 @@ export default function DriverRides() {
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Viajes Completados</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Viajes Completados</h2>
             <p className="text-3xl font-bold text-blue-500">{completedRides.length}</p>
             <p className="text-sm text-gray-500 mt-2">
               De {filteredRides.length} viajes totales
@@ -176,7 +176,7 @@ export default function DriverRides() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Ingresos Totales</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Ingresos Totales</h2>
             <p className="text-3xl font-bold text-green-500">${totalFare}</p>
             <p className="text-sm text-gray-500 mt-2">
               Promedio: ${completedRides.length > 0 ? (totalFare / completedRides.length).toFixed(0) : 0}/viaje
@@ -184,7 +184,7 @@ export default function DriverRides() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Distancia Total</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Distancia Total</h2>
             <p className="text-3xl font-bold text-purple-500">{totalDistance.toFixed(1)} km</p>
             <p className="text-sm text-gray-500 mt-2">
               Promedio: {completedRides.length > 0 ? (totalDistance / completedRides.length).toFixed(1) : 0} km/viaje
@@ -192,7 +192,7 @@ export default function DriverRides() {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-lg font-medium mb-4">Calificación Media</h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Calificación Media</h2>
             <p className="text-3xl font-bold text-yellow-500 flex items-center">
               {avgRating.toFixed(1)}
               <span className="text-yellow-400 text-xl ml-1">★</span>

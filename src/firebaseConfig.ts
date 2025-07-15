@@ -2,6 +2,7 @@
 import { FirebaseApp, getApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
+import { FirebaseStorage, getStorage } from 'firebase/storage';
 
 // Manejo seguro para evitar la inicialización en el lado del servidor durante la compilación
 const isBrowser = () => typeof window !== 'undefined';
@@ -20,6 +21,7 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
+let storage: FirebaseStorage;
 
 // Función para inicializar Firebase
 function createFirebaseApp() {
@@ -36,6 +38,26 @@ if (isBrowser()) {
   app = createFirebaseApp();
   auth = getAuth(app);
   db = getFirestore(app);
+  storage = getStorage(app);
+  
+  // Conectar a emuladores si estamos en desarrollo
+  if (process.env.NODE_ENV === 'development') {
+    // Estas líneas están comentadas para conectar directamente a Firebase real
+    // Si quieres usar los emuladores, descomenta estas líneas
+    /*
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      try {
+        connectFirestoreEmulator(db, '127.0.0.1', 8080);
+        connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+        connectStorageEmulator(storage, '127.0.0.1', 9199);
+        console.log('Connected to Firebase emulators: Firestore, Auth, and Storage');
+      } catch (error) {
+        console.error('Failed to connect to Firebase emulators:', error);
+      }
+    }
+    */
+    console.log('Using real Firebase services');
+  }
 } else {
   // Proporcionar un valor mock para el entorno del servidor
   app = {} as FirebaseApp;
@@ -44,6 +66,7 @@ if (isBrowser()) {
     onAuthStateChanged: () => () => {},
   } as unknown as Auth;
   db = {} as Firestore;
+  storage = {} as FirebaseStorage;
 }
 
-export { app, auth, db };
+export { app, auth, db, storage };

@@ -1,0 +1,50 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import RequireRole from "../../../../components/RequireRole";
+import { useAuth } from "../../../../context/AuthProvider";
+import DashboardLayout from "../../../../components/DashboardLayout";
+import { CompanyData, getAllCompanies, createCompany, updateCompany } from "../../../../utils/companyUtils";
+import CompanyUserManager from "../../../../components/CompanyUserManager";
+
+export default function CompaniesManager() {
+  const { userRole } = useAuth();
+  const [companies, setCompanies] = useState<CompanyData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyData | null>(null);
+  const [activeTab, setActiveTab] = useState<'companies' | 'users'>('companies');
+  const [formData, setFormData] = useState({
+    name: "",
+    contactEmail: "",
+    contactPhone: "",
+    primaryColor: "#FF5500",
+    active: true,
+  });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadCompanies();
+  }, []);
+
+  async function loadCompanies() {
+    try {
+      setLoading(true);
+      // Pasamos el rol de usuario para verificar permisos
+      const companiesList = await getAllCompanies(userRole || undefined);
+      setCompanies(companiesList);
+    } catch (error) {
+      console.error("Error cargando compañías:", error);
+      setError("Error al cargar las compañías: " + (error instanceof Error ? error.message : String(error)));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleCreateCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const companyData = {
+        ...formData,
